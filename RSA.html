@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html> 
+<head>
+<title>RSA</title>
+
+<script language="JavaScript">
+function gcd (a, b)
+{
+   var r;
+   while (b>0)
+   {
+      r=a%b;
+      a=b;
+      b=r;
+   }
+   return a;
+}
+
+function rel_prime(phi)
+{
+   var rel=5;
+   
+   while (gcd(phi,rel)!=1)
+      rel++;
+   return rel;
+}
+
+function power(a, b)
+{
+   var temp=1, i;
+   for(i=1;i<=b;i++)
+      temp*=a;
+    return temp;
+}
+
+function encrypt(N, e, M)
+{
+   var r,i=0,prod=1,rem_mod=0;
+   while (e>0)
+   {
+      r=e % 2;
+      if (i++==0)
+         rem_mod=M % N;
+      else
+         rem_mod=power(rem_mod,2) % N;
+      if (r==1)
+      {
+         prod*=rem_mod;
+         prod=prod % N;
+      }
+      e=parseInt(e/2);
+   }
+   return prod;
+}
+
+function calculate_d(phi,e)
+{
+   var x,y,x1,x2,y1,y2,temp,r,orig_phi;
+   orig_phi=phi;
+   x2=1;x1=0;y2=0;y1=1;
+   while (e>0)
+   {
+      temp=parseInt(phi/e);
+      r=phi-temp*e;
+      x=x2-temp*x1;
+      y=y2-temp*y1;
+      phi=e;e=r;
+      x2=x1;x1=x;
+      y2=y1;y1=y;
+      if (phi==1)
+      {
+         y2+=orig_phi;
+         break;
+      }
+   }
+   return y2;
+}
+
+function decrypt(c, d, N)
+{
+   var r,i=0,prod=1,rem_mod=0;
+   while (d>0)
+   {
+      r=d % 2;
+      if (i++==0)
+         rem_mod=c % N;
+      else
+         rem_mod=power(rem_mod,2) % N;
+      if (r==1)
+      {
+         prod*=rem_mod;
+         prod=prod % N;
+      }
+      d=parseInt(d/2);
+   }
+   return prod;
+}
+
+
+function openNew()
+{
+   // <!--var subWindow=window.open("Output.htm", "Obj","HEIGHT=400,WIDTH=600,SCROLLBARS=YES");-->
+   var p=parseInt(document.getElementById('p').value);
+   var q=parseInt(document.getElementById('q').value);
+   var M=parseInt(document.getElementById('M').value);
+   var number = /^[0-9]+$/;
+    if(p=="" || q=="" || M=="")
+    {
+        alert("Fields Should not be Empty !!!!! (Please Fill All The Given Fileds.)");
+    }
+    else if(!number.test(p) || !number.test(q) || !number.test(M) )
+    {
+        alert("Don't use letters or special characters\n Use only Numbers");
+    }
+   var N=p * q;
+   var phi=(p-1)*(q-1);
+   var e=rel_prime(phi);
+   var c=encrypt(N,e,M);
+   var d=calculate_d(phi,e);
+   
+   document.getElementById('Ne').value = N;
+   document.getElementById('phi').value = phi;
+   document.getElementById('e').value = e;
+   document.getElementById('c').value = c;
+   document.getElementById('d').value = d;
+   document.getElementById('M1').value = decrypt(c,d,N);
+}
+function reset()
+{
+   // <!--var subWindow=window.open("Output.htm", "Obj","HEIGHT=400,WIDTH=600,SCROLLBARS=YES");-->
+   document.getElementById('p').value = 0;
+   document.getElementById('q').value = 0;
+   document.getElementById('M').value = 0;
+   document.getElementById('Ne').value = 0;
+   document.getElementById('phi').value = 0;
+   document.getElementById('e').value = 0;
+   document.getElementById('c').value = 0;
+   document.getElementById('d').value = 0;
+   document.getElementById('M1').value = 0;
+}
+
+</script>
+<style type="text/css">
+    .footer
+        {
+           position: fixed;
+           left: 0;
+           bottom: 1%;
+           width: 100%;
+           color: grey;
+           text-align: center;
+        }
+</style>
+</head>
+
+<body>
+<center><p><font size="6">RSA</font></p></center>
+<p><font size="6">Input Form</font></p>
+<hr>
+<form name="Input">
+<table border="0" width="100%" height="109">
+  <tr>
+    <td width="24%" height="23">
+        <font color="#0000FF">Enter P</font></td>
+    <td width="76%" height="23">
+         <input type="text" name="p" id="p" size="20"></td>
+  </tr>
+  <tr>
+    <td width="24%" height="23"><font color="#0000FF">
+             Enter Q</font></td>
+    <td width="76%" height="23">
+          <input type="text" name="q" id="q" size="20"></td>
+  </tr>
+  <tr>
+    <td width="24%" height="20">
+        <font color="#0000FF">Enter any Number ( M )</font></td>
+    <td width="76%" height="20"><input type="text" name="M" id="M" size="20"></td>
+  </tr>
+  <tr>
+    <td width="24%" height="19"><input type="button" 
+         value="Submit" name="Submit" onClick="openNew()"></td>
+    <td width="76%" height="19"><input type="Submit" 
+          value="Reset" name="Reset" onclick="reset()"></td>
+  </tr>
+</table>
+</form>
+<p>&nbsp;</p>
+
+<!-- OUTPUT PAGE -->
+
+<p><font size="6">Output</font></p>
+<hr>
+
+<form name="Output">
+<table border="0" width="100%">
+  <tr>
+    <td width="22%"><font color="#0000FF">N
+      </font></td>
+    <td width="78%"><input type="text" name="Ne" id="Ne" size="20"></td>
+  </tr>
+  <tr>
+    <td width="22%"><font color="#0000FF">Phi</font></td>
+    <td width="78%"><input type="text" id="phi" name="phi" size="20"></td>
+  </tr>
+  <tr>
+    <td width="22%"><font color="#0000FF">e</font></td>
+    <td width="78%">
+   <input type="text" name="e" id="e" size="20"></td>
+  </tr>
+  <tr>
+    <td width="22%"><font color="#0000FF">Encrypted Text
+     </font></td>
+    <td width="78%">
+    <input type="text" name="c" id="c" size="20"></td>
+  </tr>
+  <tr>
+    <td width="22%"><font color="#0000FF">d
+        </font></td>
+    <td width="78%"><input type="text" name="d" id="d" size="20">
+        </td>
+  </tr>
+  <tr>
+    <td width="22%"><font color="#0000FF">
+        Decrypted Text</font></td>
+    <td width="78%"><input type="text" name="M1" id="M1" size="20"></td>
+  </tr>
+  <tr>
+    <td width="22%" style="padding-top: 20px;">
+      <input type="button" value="Close" name="Close"  onClick="window.close()"></td>
+    <td width="78%">&nbsp;</td>
+  </tr>
+</table>
+</form>
+<p>&nbsp;</p>
+<div class="footer">
+  <a href="https://sakthi2102.github.io/" style="text-decoration: none; color: grey;">Copyright © 2023,Developed by S.Veerasakthivel - (20UIT033)</a>
+</div>
+</body>
+
+</html>
